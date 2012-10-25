@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+
+		<!-- Always force latest IE rendering engine (even in intranet) & Chrome Frame
+		Remove this if you use the .htaccess -->
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+
+		<title>index</title>
+		<meta name="description" content="" />
+		<meta name="author" content="heysh" />
+
+		<meta name="viewport" content="width=device-width; initial-scale=1.0" />
+
+		<!-- Replace favicon.ico & apple-touch-icon.png in the root of your domain and delete these references -->
+		<link rel="shortcut icon" href="/favicon.ico" />
+		<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+		<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+	</head>
+
+	<body>
+		<div>
+			<header>
+				<h1>index</h1>
+			</header>
+			<canvas id="gears" width="1200" height="800">
+				<!--nothing there-->
+			</canvas>
+			<nav>
+				<p>
+					<a href="/">Home</a>
+				</p>
+				<p>
+					<a href="/contact">Contact</a>
+				</p>
+			</nav>
+
+			<div>
+
+			</div>
+
+			<footer>
+				<p>
+					&copy; Copyright  by heysh
+				</p>
+			</footer>
+		</div>
+		<script type="text/javascript">
+			var canvas=$("#gears")
+			var context=canvas.get(0).getContext("2d")
+			//context.fillRect(0,0,canvas.width(),canvas.height())
+			var pi=Math.PI;
+			/*init a gear
+			 * in 2 ways
+			 * 
+			 */
+			var Gear = function (z,m,x,y){
+				this.z=z;
+				this.m=m;
+				this.d=m*z;
+				this.h=m;
+				this.c=0.25*m;
+				this.x=x;
+				this.y=y;
+			}
+			function writePosition(fGear,angle){
+				var l=(this.d+fGear.d)/2;
+				this.x=fGear.x+l*Math.cos(angle);
+				this.y=fGear.y+l*Math.sin(angle);
+			}
+			Gear.prototype.writePosition=writePosition;
+			function genGearP(z,m,fGear,angle){
+				var tmpGear=new Gear(z,m,0,0);
+				tmpGear.writePosition(fGear,angle);
+				return tmpGear;
+			}
+			
+			
+			function getAngle(firstGear,secondGear,angle1){
+				var x1=firstGear.x;
+				var x2=secondGear.x;
+				var y1=firstGear.y;
+				var y2=secondGear.y;
+				var z1=firstGear.z;
+				var z2=secondGear.z;
+				var a=Math.atan2(y1-y2,x2-x1);
+				return (-a+Math.PI*(1-1/z2)-angle1*z1/z2-a*z1/z2);
+				
+			}
+
+			function drawAGear(anyGear,angle){
+				context.beginPath();
+				var angle=angle-2*Math.PI/anyGear.z*5/8;
+				for (var i=0; i < anyGear.z; i++) {
+					var pi=Math.PI;
+					var z=anyGear.z;
+					context.arc(anyGear.x,anyGear.y,anyGear.d/2+anyGear.h,i*2*pi/z+angle,(i+1/4)*2*pi/z+angle,false);
+					context.arc(anyGear.x,anyGear.y,anyGear.d/2-anyGear.h-anyGear.c,(i+1/2)*2*pi/z+angle,(i+3/4)*2*pi/z+angle,false);
+				};
+				context.closePath();
+				context.stroke();
+				context.fillStyle="rgb(255,255,255)";
+				context.globalCompositeOperation="destination-over";
+				context.globalAlpha="0.7";
+				context.fill();
+				//context.beginPath();
+				//context.arc(anyGear.x,anyGear.y,anyGear.d/6,0,2*pi,false);
+				//context.closePath();
+				//context.stroke();
+			}
+			function eraseAGear(){}
+			var gear1=new Gear(40,10,300,300);
+			var gear2=genGearP(30,10,gear1,pi/6);
+			var gear3=genGearP(100,10,gear2,-pi/2);
+			// var gear2=new Gear(30,10,0,0);
+			// gear2.writePosition(gear1,Math.PI/6);
+			// var gear3=new Gear(100,10,0,0);
+			// gear3.writePosition(gear2,-Math.PI/2);
+			function drawAll(){
+				if (rotateTime>=180){
+					rotateTime=rotateTime-180;
+				}
+				context.clearRect(0,0,canvas.width(),canvas.height());
+				var rAngle=rotateTime/180*Math.PI;
+				drawAGear(gear1,rAngle);
+				var angle2=getAngle(gear1,gear2,rAngle);
+				drawAGear(gear2,angle2);
+				var angle3=getAngle(gear2,gear3,angle2);
+				drawAGear(gear3,angle3);
+				
+				rotateTime=rotateTime+0.2;
+			}
+			var rotateTime=1;
+			setInterval(drawAll,50);
+			//context.beginPath();
+			//context.moveTo(gear1.x,gear1.y);
+			//context.lineTo(gear2.x,gear2.y);
+			//context.closePath();
+			//context.stroke();
+		</script>
+	</body>
+</html>
