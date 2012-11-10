@@ -128,11 +128,24 @@
 				drawAGear(gear2,angle2);
 				var angle3=getAngle(gear2,gear3,angle2);
 				drawAGear(gear3,angle3);
-				
 				rotateTime=rotateTime+0.2;
+				requestAnimFrame(function() { drawAll(); });
 			}
+		window.requestAnimFrame = (function(callback){
+    		return window.requestAnimationFrame ||
+   				window.webkitRequestAnimationFrame ||
+   				window.mozRequestAnimationFrame ||
+    			window.oRequestAnimationFrame ||
+    			window.msRequestAnimationFrame ||
+    			function(callback){
+        			window.setTimeout(callback, 1000 / 60);
+    			};
+		})();
 			var rotateTime=1;
-			setInterval(drawAll,17);
+			window.onload = function(){
+    			drawAll();
+			};
+			//setInterval(drawAll,17);
 			//context.beginPath();
 			//context.moveTo(gear1.x,gear1.y);
 			//context.lineTo(gear2.x,gear2.y);
