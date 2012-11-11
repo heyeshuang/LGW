@@ -51,6 +51,7 @@
 			var context=canvas.get(0).getContext("2d")
 			//context.fillRect(0,0,canvas.width(),canvas.height())
 			var pi=Math.PI;
+
 			/*init a gear
 			 * in 2 ways
 			 * 
@@ -70,13 +71,16 @@
 				this.y=fGear.y+l*Math.sin(angle);
 			}
 			Gear.prototype.writePosition=writePosition;
-			function genGearP(z,m,fGear,angle){
+			function genGearP(z,m,fGear,angle){			//create a new gear by angle and gears created before
+				
 				var tmpGear=new Gear(z,m,0,0);
 				tmpGear.writePosition(fGear,angle);
 				return tmpGear;
 			}
-			
-			
+			var gear1=new Gear(40,10,300,300);
+			var gear2=genGearP(30,10,gear1,pi/6);
+			var gear3=genGearP(100,10,gear2,-pi/2);
+
 			function getAngle(firstGear,secondGear,angle1){
 				var x1=firstGear.x;
 				var x2=secondGear.x;
@@ -88,49 +92,54 @@
 				return (-a+Math.PI*(1-1/z2)-angle1*z1/z2-a*z1/z2);
 				
 			}
-
-			function drawAGear(anyGear,angle){
-				context.beginPath();
-				var angle=angle-2*Math.PI/anyGear.z*5/8;
+			
+			function preCanvasG(anyGear){
+				var gcanvas=document.createElement('canvas');
+				gcanvas.width=anyGear.d+2*anyGear.h;
+				gcanvas.height=anyGear.d+2*anyGear.h;
+				var gcontext=gcanvas.getContext('2d');
+				gcontext.beginPath();
 				for (var i=0; i < anyGear.z; i++) {
 					var pi=Math.PI;
 					var z=anyGear.z;
-					context.arc(anyGear.x,anyGear.y,anyGear.d/2+anyGear.h,i*2*pi/z+angle,(i+1/4)*2*pi/z+angle,false);
-					context.arc(anyGear.x,anyGear.y,anyGear.d/2-anyGear.h-anyGear.c,(i+1/2)*2*pi/z+angle,(i+3/4)*2*pi/z+angle,false);
+					gcontext.arc(anyGear.d/2+anyGear.h,anyGear.d/2+anyGear.h,anyGear.d/2+anyGear.h,i*2*pi/z,(i+1/4)*2*pi/z,false);
+					gcontext.arc(anyGear.d/2+anyGear.h,anyGear.d/2+anyGear.h,anyGear.d/2-anyGear.h-anyGear.c,(i+1/2)*2*pi/z,(i+3/4)*2*pi/z,false);
 				};
-				context.closePath();
-				context.stroke();
-				context.fillStyle="rgb(255,255,255)";
-				context.globalCompositeOperation="destination-over";
-				context.globalAlpha="0.7";
-				context.fill();
-				//context.beginPath();
-				//context.arc(anyGear.x,anyGear.y,anyGear.d/6,0,2*pi,false);
-				//context.closePath();
-				//context.stroke();
+				gcontext.closePath();
+				gcontext.stroke();
+				gcontext.fillStyle="rgb(255,255,255)";
+				gcontext.globalCompositeOperation="destination-over";
+				gcontext.globalAlpha="0.7";
+				gcontext.fill();
+				return gcanvas;
 			}
+			
+			function drawAGear2(canvasG,thisGear,angle){
+				var angle=angle-2*Math.PI/thisGear.z*5/8;
+				context.save();
+				context.translate(thisGear.x,thisGear.y);
+				context.rotate(angle);
+				context.drawImage(canvasG,-(thisGear.d/2+thisGear.h),-(thisGear.d/2+thisGear.h));
+				context.restore();
+			}
+					
 			function eraseAGear(){}
-			var gear1=new Gear(40,10,300,300);
-			var gear2=genGearP(30,10,gear1,pi/6);
-			var gear3=genGearP(100,10,gear2,-pi/2);
-			// var gear2=new Gear(30,10,0,0);
-			// gear2.writePosition(gear1,Math.PI/6);
-			// var gear3=new Gear(100,10,0,0);
-			// gear3.writePosition(gear2,-Math.PI/2);
+
 			function drawAll(){
-				if (rotateTime>=180){
-					rotateTime=rotateTime-180;
+				if (rotateTime>=360){
+					rotateTime=rotateTime-360;
 				}
 				context.clearRect(0,0,canvas.width(),canvas.height());
 				var rAngle=rotateTime/180*Math.PI;
-				drawAGear(gear1,rAngle);
+				drawAGear2(canvas1,gear1,rAngle);
 				var angle2=getAngle(gear1,gear2,rAngle);
-				drawAGear(gear2,angle2);
+				drawAGear2(canvas2,gear2,angle2);
 				var angle3=getAngle(gear2,gear3,angle2);
-				drawAGear(gear3,angle3);
+				drawAGear2(canvas3,gear3,angle3);
 				rotateTime=rotateTime+0.2;
-				requestAnimFrame(function() { drawAll(); });
+				requestAnimFrame(function() {drawAll();});
 			}
+			
 		window.requestAnimFrame = (function(callback){
     		return window.requestAnimationFrame ||
    				window.webkitRequestAnimationFrame ||
@@ -142,15 +151,13 @@
     			};
 		})();
 			var rotateTime=1;
+			canvas1=preCanvasG(gear1);
+			canvas2=preCanvasG(gear2);
+			canvas3=preCanvasG(gear3);
 			window.onload = function(){
     			drawAll();
 			};
-			//setInterval(drawAll,17);
-			//context.beginPath();
-			//context.moveTo(gear1.x,gear1.y);
-			//context.lineTo(gear2.x,gear2.y);
-			//context.closePath();
-			//context.stroke();
+
 		</script>
 	</body>
 </html>
